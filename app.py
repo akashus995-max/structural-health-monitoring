@@ -466,6 +466,13 @@ st.title("AI-Based Structural Health Monitoring & Audit Dashboard")
 # Initialize models and datasets
 df_synthetic, model_rf, model_accuracy = train_ai_model()
 
+# Initialize session state variables
+if 'simulation_running' not in st.session_state:
+    st.session_state.simulation_running = False
+
+if 'telemetry_history' not in st.session_state:
+    st.session_state.telemetry_history = pd.DataFrame(columns=['Timestamp', 'Vibration', 'Deflection', 'Temperature', 'CrackWidth'])
+
 # Sidebar Setup
 st.sidebar.image("https://img.icons8.com/color/150/bridge.png", width=90)
 st.sidebar.header("Navigation Panel")
