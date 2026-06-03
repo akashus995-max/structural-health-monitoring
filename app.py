@@ -551,16 +551,7 @@ if page == "🏢 Academic Overview & Theory":
         * **Age (15%)**: Accounts for carbonation, creep, and environmental degradation factors.
         """)
 
-    st.markdown("---")
-    
-    st.subheader("Key Academic Assumptions")
-    st.markdown("""
-    * **Independent Degradation**: It is assumed that structural parameters behave independently when calculating the health index, although in field conditions, corrosion leads to faster concrete cracking.
-    * **Reference Bounds**: Normalized bounds are set based on standardized building codes (e.g. ACI 318, Indian Standard IS 456, and Eurocode 2).
-    * **Environmental Stability**: Temperature fluctuations are assumed to represent expansion/contraction parameters, but are kept stable to prevent thermal deflection anomalies during regular audits.
-    """)
-    
-    st.info("💡 **Student Note:** You can test these formulas by navigating to the **Structural Audit & AI Predictor** tab in the sidebar and modifying the sliders.")
+    st.info("💡 **Note:** You can test these formulas by navigating to the **Structural Audit & AI Predictor** tab in the sidebar and modifying the sliders.")
 
 # -----------------------------------------------------------------------------
 # PAGE B: STRUCTURAL AUDIT & AI PREDICTOR
