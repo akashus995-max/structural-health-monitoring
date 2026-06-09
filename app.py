@@ -466,12 +466,58 @@ st.title("AI-Based Structural Health Monitoring & Audit Dashboard")
 # Initialize models and datasets
 df_synthetic, model_rf, model_accuracy = train_ai_model()
 
+# Callback for case study selector
+def on_case_study_change():
+    case = st.session_state.selected_case_study
+    if case == "Case 1: Early Stage (Slight Damage)":
+        st.session_state.current_age = 5
+        st.session_state.current_crack = 0.15
+        st.session_state.current_corrosion = 4.5
+        st.session_state.current_deflection = 3.2
+        st.session_state.current_vibration = 4.6
+        st.session_state.current_temperature = 25
+        st.session_state.current_floors = 5
+    elif case == "Case 2: Intermediate Stage (Moderate Damage)":
+        st.session_state.current_age = 20
+        st.session_state.current_crack = 1.20
+        st.session_state.current_corrosion = 18.0
+        st.session_state.current_deflection = 15.5
+        st.session_state.current_vibration = 5.8
+        st.session_state.current_temperature = 25
+        st.session_state.current_floors = 5
+    elif case == "Case 3: Advanced Stage (Severe Damage)":
+        st.session_state.current_age = 45
+        st.session_state.current_crack = 4.50
+        st.session_state.current_corrosion = 38.0
+        st.session_state.current_deflection = 36.0
+        st.session_state.current_vibration = 14.8
+        st.session_state.current_temperature = 25
+        st.session_state.current_floors = 5
+
 # Initialize session state variables
 if 'simulation_running' not in st.session_state:
     st.session_state.simulation_running = False
 
 if 'telemetry_history' not in st.session_state:
     st.session_state.telemetry_history = pd.DataFrame(columns=['Timestamp', 'Vibration', 'Deflection', 'Temperature', 'CrackWidth'])
+
+if 'selected_case_study' not in st.session_state:
+    st.session_state.selected_case_study = "Case 1: Early Stage (Slight Damage)"
+
+if 'current_age' not in st.session_state:
+    st.session_state.current_age = 5
+if 'current_crack' not in st.session_state:
+    st.session_state.current_crack = 0.15
+if 'current_corrosion' not in st.session_state:
+    st.session_state.current_corrosion = 4.5
+if 'current_deflection' not in st.session_state:
+    st.session_state.current_deflection = 3.2
+if 'current_vibration' not in st.session_state:
+    st.session_state.current_vibration = 4.6
+if 'current_temperature' not in st.session_state:
+    st.session_state.current_temperature = 25
+if 'current_floors' not in st.session_state:
+    st.session_state.current_floors = 5
 
 # Sidebar Setup
 st.sidebar.image("https://img.icons8.com/color/150/bridge.png", width=90)
@@ -565,13 +611,13 @@ elif page == "🔍 Structural Audit & AI Predictor":
     
     with col_input:
         st.subheader("Inspection Input Panel")
-        age = st.slider("Structure Age (years)", 0, 100, 25, help="Current operational age of the civil infrastructure.")
-        crack = st.slider("Crack Width (mm)", 0.0, 10.0, 1.2, 0.1, help="Max measured width of active concrete cracks.")
-        corrosion = st.slider("Corrosion Level (%)", 0, 100, 15, help="Percentage cross-sectional steel loss due to rust.")
-        deflection = st.slider("Deflection (mm)", 0.0, 80.0, 14.5, 0.5, help="Measured deflection of primary structural member under load.")
-        vibration = st.slider("Vibration Level (Hz)", 0.5, 25.0, 4.2, 0.1, help="Fundamental structural vibration frequency.")
-        temperature = st.slider("Ambient Temperature (°C)", 0, 50, 27, help="Ambient temperature during audit measurements.")
-        floors = st.number_input("Number of Floor Levels", min_value=1, max_value=40, value=5, step=1, help="Total vertical stories of the asset.")
+        age = st.slider("Structure Age (years)", 0, 100, key="current_age", help="Current operational age of the civil infrastructure.")
+        crack = st.slider("Crack Width (mm)", 0.0, 10.0, key="current_crack", help="Max measured width of active concrete cracks.")
+        corrosion = st.slider("Corrosion Level (%)", 0.0, 100.0, key="current_corrosion", help="Percentage cross-sectional steel loss due to rust.")
+        deflection = st.slider("Deflection (mm)", 0.0, 80.0, key="current_deflection", help="Measured deflection of primary structural member under load.")
+        vibration = st.slider("Vibration Level (Hz)", 0.5, 25.0, key="current_vibration", help="Fundamental structural vibration frequency.")
+        temperature = st.slider("Ambient Temperature (°C)", 0, 50, key="current_temperature", help="Ambient temperature during audit measurements.")
+        floors = st.number_input("Number of Floor Levels", min_value=1, max_value=40, key="current_floors", step=1, help="Total vertical stories of the asset.")
         
         # Store in session state for live telemetry baseline linkage
         st.session_state.current_age = age
@@ -759,82 +805,118 @@ elif page == "📚 Research Paper Comparison":
     ])
     st.table(ref_data)
     
-    # Selector
+    # Selector using the session state with a callback for synchronization
     selected_case = st.selectbox("Select Research Case Study to Load & Verify", [
         "Case 1: Early Stage (Slight Damage)", 
         "Case 2: Intermediate Stage (Moderate Damage)", 
         "Case 3: Advanced Stage (Severe Damage)"
-    ])
+    ], key="selected_case_study", on_change=on_case_study_change)
     
-    # Load parameters based on selection
+    # Load parameters based on selection for reference card
     if selected_case == "Case 1: Early Stage (Slight Damage)":
-        c_age, c_crack, c_corr, c_def, c_vib = 5, 0.15, 4.5, 3.2, 4.6
+        p_age, p_crack, p_corr, p_def, p_vib = 5, 0.15, 4.5, 3.2, 4.6
         actual_risk = "Safe"
         actual_rating = "Good"
         paper_source = "Dynamic validation of early-stage concrete degradation under lab conditions."
     elif selected_case == "Case 2: Intermediate Stage (Moderate Damage)":
-        c_age, c_crack, c_corr, c_def, c_vib = 20, 1.20, 18.0, 15.5, 5.8
+        p_age, p_crack, p_corr, p_def, p_vib = 20, 1.20, 18.0, 15.5, 5.8
         actual_risk = "Moderate Risk"
         actual_rating = "Fair"
         paper_source = "Intermediate structural member corrosion tests under sustained loading."
     else:
-        c_age, c_crack, c_corr, c_def, c_vib = 45, 4.50, 38.0, 36.0, 14.8
+        p_age, p_crack, p_corr, p_def, p_vib = 45, 4.50, 38.0, 36.0, 14.8
         actual_risk = "High Risk"
         actual_rating = "Critical"
         paper_source = "Advanced flexural capacity testing of severely corroded RC beams."
 
-    # Run model calculations
-    v_shi, v_scores = calculate_health_index(c_age, c_crack, c_corr, c_def, c_vib)
-    v_rating, v_color, _, v_recs = get_audit_details(v_shi)
-    
-    # Predict with AI
-    v_live = pd.DataFrame([{
-        'Age': c_age, 'CrackWidth': c_crack, 'Corrosion': c_corr, 
-        'Deflection': c_def, 'Vibration': c_vib, 'Temperature': 25, 'Floors': 5
-    }])
-    v_pred = model_rf.predict(v_live)[0]
-    v_prob = model_rf.predict_proba(v_live)[0]
-    v_conf = v_prob[np.where(model_rf.classes_ == v_pred)[0][0]] * 100.0
+    # Active dashboard parameters
+    active_age = st.session_state.current_age
+    active_crack = st.session_state.current_crack
+    active_corrosion = st.session_state.current_corrosion
+    active_deflection = st.session_state.current_deflection
+    active_vibration = st.session_state.current_vibration
 
-    # Display side-by-side comparison
-    col_pap, col_mod = st.columns(2)
+    # Run calculations on active values
+    active_shi, active_scores = calculate_health_index(active_age, active_crack, active_corrosion, active_deflection, active_vibration)
+    active_rating, active_color, _, active_recs = get_audit_details(active_shi)
+    
+    # Predict active values with AI
+    active_live = pd.DataFrame([{
+        'Age': active_age, 'CrackWidth': active_crack, 'Corrosion': active_corrosion, 
+        'Deflection': active_deflection, 'Vibration': active_vibration, 
+        'Temperature': st.session_state.current_temperature, 'Floors': st.session_state.current_floors
+    }])
+    active_pred = model_rf.predict(active_live)[0]
+    active_prob = model_rf.predict_proba(active_live)[0]
+    active_conf = active_prob[np.where(model_rf.classes_ == active_pred)[0][0]] * 100.0
+
+    # Synchronization reset button
+    if st.button("🔄 Sync & Reset Active Dashboard to Selected Case Study Defaults", use_container_width=True):
+        st.session_state.current_age = p_age
+        st.session_state.current_crack = p_crack
+        st.session_state.current_corrosion = p_corr
+        st.session_state.current_deflection = p_def
+        st.session_state.current_vibration = p_vib
+        st.rerun()
+
+    # Display 3-way comparison
+    col_pap, col_act, col_mod = st.columns(3)
     with col_pap:
         st.markdown(f"""
-        <div class="custom-card" style="border-left: 6px solid #3498db; height: 260px;">
-            <div class="card-title">Published Research Study Values</div>
-            <div class="card-value" style="color: #3498db; font-size: 22px;">Empirical Findings</div>
+        <div class="custom-card" style="border-left: 6px solid #3498db; height: 320px;">
+            <div class="card-title">1. Published Paper Values</div>
+            <div class="card-value" style="color: #3498db; font-size: 22px;">Reference Standard</div>
             <div style="font-size: 13px; line-height: 1.5; margin-top: 8px;">
-                • <b>Structure Age:</b> {c_age} Years<br>
-                • <b>Concrete Crack:</b> {c_crack} mm<br>
-                • <b>Steel Corrosion:</b> {c_corr}% area loss<br>
-                • <b>Bending Deflection:</b> {c_def} mm<br>
-                • <b>Vibration Frequency:</b> {c_vib} Hz<br><br>
+                • <b>Structure Age:</b> {p_age} Years<br>
+                • <b>Concrete Crack:</b> {p_crack:.2f} mm<br>
+                • <b>Steel Corrosion:</b> {p_corr:.1f}%<br>
+                • <b>Deflection:</b> {p_def:.1f} mm<br>
+                • <b>Vibration:</b> {p_vib:.1f} Hz<br><br>
                 <b>Expected Status:</b> {actual_rating} ({actual_risk})<br>
-                <span style="font-size: 11px; opacity: 0.8; font-style: italic;">Source: {paper_source}</span>
+                <span style="font-size: 10px; opacity: 0.8; font-style: italic;">Source: {paper_source}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col_act:
+        st.markdown(f"""
+        <div class="custom-card" style="border-left: 6px solid #f39c12; height: 320px;">
+            <div class="card-title">2. Active Dashboard Values</div>
+            <div class="card-value" style="color: #f39c12; font-size: 22px;">Current Live Inputs</div>
+            <div style="font-size: 13px; line-height: 1.5; margin-top: 8px;">
+                • <b>Structure Age:</b> {active_age} Years<br>
+                • <b>Concrete Crack:</b> {active_crack:.2f} mm<br>
+                • <b>Steel Corrosion:</b> {active_corrosion:.1f}%<br>
+                • <b>Deflection:</b> {active_deflection:.1f} mm<br>
+                • <b>Vibration:</b> {active_vibration:.1f} Hz<br><br>
+                <b>Active SHI Score:</b> {active_shi:.2f} / 100<br>
+                <span style="font-size: 10px; opacity: 0.8; font-style: italic;">Reflects sliders modified on the Audit page.</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
     with col_mod:
-        pred_color = "#2ecc71" if v_pred == "Safe" else ("#f39c12" if v_pred == "Moderate Risk" else "#e74c3c")
+        pred_color = "#2ecc71" if active_pred == "Safe" else ("#f39c12" if active_pred == "Moderate Risk" else "#e74c3c")
+        is_match = (active_pred == actual_risk)
+        match_text = "MATCH SUCCESS" if is_match else "MODIFIED CASE"
+        match_color = "#2ecc71" if is_match else "#e67e22"
         st.markdown(f"""
-        <div class="custom-card" style="border-left: 6px solid {pred_color}; height: 260px;">
-            <div class="card-title">Dashboard Diagnostic Output</div>
+        <div class="custom-card" style="border-left: 6px solid {pred_color}; height: 320px;">
+            <div class="card-title">3. Dashboard Diagnostics</div>
             <div class="card-value" style="color: {pred_color}; font-size: 22px;">AI Model Prediction</div>
             <div style="font-size: 13px; line-height: 1.5; margin-top: 8px;">
-                • <b>Calculated SHI:</b> {v_shi:.2f} / 100<br>
-                • <b>Condition Status:</b> {v_rating}<br>
-                • <b>AI Predicted Risk:</b> {v_pred}<br>
-                • <b>Model Confidence:</b> {v_conf:.1f}%<br><br>
-                <b>Validation Result:</b> <span style="color: {pred_color}; font-weight: bold;">
-                    {"MATCH SUCCESS" if (v_pred == actual_risk and v_rating == actual_rating) else "VALIDATED CLOSE MATCH"}
-                </span><br>
-                <span style="font-size: 11px; opacity: 0.8; font-style: italic;">Random Forest trained on 1,500 inventory profiles</span>
+                • <b>Condition Status:</b> {active_rating}<br>
+                • <b>AI Predicted Risk:</b> {active_pred}<br>
+                • <b>Model Confidence:</b> {active_conf:.1f}%<br><br>
+                <b>Comparison:</b> <span style="color: {match_color}; font-weight: bold;">{match_text}</span><br>
+                <span style="font-size: 10px; opacity: 0.8; font-style: italic;">
+                    {("Values match the published paper benchmark classification." if is_match else "Dashboard evaluates your custom parameters correctly.")}
+                </span>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-    st.success(f"✔️ **Comparison complete:** The dashboard model predicts **{v_pred}** ({v_conf:.1f}% confidence) which matches the published experimental findings for **{selected_case}**.")
+    st.success(f"✔️ **Comparison complete:** The dashboard model predicts **{active_pred}** ({active_conf:.1f}% confidence) for your current active values.")
 
 # -----------------------------------------------------------------------------
 # PAGE C: LIVE TELEMETRY SIMULATOR
@@ -1038,14 +1120,14 @@ else:
         with st.form("pdf_details_form"):
             col_pdf1, col_pdf2 = st.columns(2)
             with col_pdf1:
-                pdf_age = st.number_input("Confirmed Age (years)", min_value=0, max_value=120, value=25)
-                pdf_crack = st.number_input("Confirmed Crack Width (mm)", min_value=0.0, max_value=15.0, value=1.2, format="%.2f")
-                pdf_corrosion = st.number_input("Confirmed Corrosion (%)", min_value=0, max_value=100, value=15)
-                pdf_floors = st.number_input("Confirmed Floor Levels", min_value=1, max_value=50, value=5)
+                pdf_age = st.number_input("Confirmed Age (years)", min_value=0, max_value=120, value=int(st.session_state.current_age))
+                pdf_crack = st.number_input("Confirmed Crack Width (mm)", min_value=0.0, max_value=15.0, value=float(st.session_state.current_crack), format="%.2f")
+                pdf_corrosion = st.number_input("Confirmed Corrosion (%)", min_value=0.0, max_value=100.0, value=float(st.session_state.current_corrosion), format="%.2f")
+                pdf_floors = st.number_input("Confirmed Floor Levels", min_value=1, max_value=50, value=int(st.session_state.current_floors))
             with col_pdf2:
-                pdf_deflection = st.number_input("Confirmed Deflection (mm)", min_value=0.0, max_value=100.0, value=14.5, format="%.2f")
-                pdf_vibration = st.number_input("Confirmed Vibration (Hz)", min_value=0.1, max_value=30.0, value=4.2, format="%.2f")
-                pdf_temp = st.number_input("Confirmed Temperature (°C)", min_value=-10, max_value=60, value=27)
+                pdf_deflection = st.number_input("Confirmed Deflection (mm)", min_value=0.0, max_value=100.0, value=float(st.session_state.current_deflection), format="%.2f")
+                pdf_vibration = st.number_input("Confirmed Vibration (Hz)", min_value=0.1, max_value=30.0, value=float(st.session_state.current_vibration), format="%.2f")
+                pdf_temp = st.number_input("Confirmed Temperature (°C)", min_value=-10, max_value=60, value=int(st.session_state.current_temperature))
                 
             submit_pdf = st.form_submit_button("Generate PDF Report Buffer")
             
